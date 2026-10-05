@@ -1,0 +1,4 @@
+name,email,phone,skills,location
+Import Sample Valid,import-valid@example.com,DEMO-IMPORT-NEW,"React, TypeScript",Demo City
+Import Sample Invalid,not-an-email,DEMO-IMPORT-BAD,Operations,Demo City
+Import Sample Duplicate,candidate1@example.com,DEMO-IMPORT-DUP,Analysis,Demo City

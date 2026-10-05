@@ -1,0 +1,1 @@
+{"root":["./src/analytics.tsx","./src/app.tsx","./src/importcandidates.tsx","./src/recordactions.tsx","./src/records.tsx","./src/settings.tsx","./src/talentviews.tsx","./src/workflowviews.tsx","./src/actions.ts","./src/components.tsx","./src/export.ts","./src/main.tsx","./src/model.ts","./src/persistence.ts","./src/schema.ts","./src/seed.ts","./src/store.tsx"],"version":"5.9.3"}

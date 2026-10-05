@@ -1,0 +1,290 @@
+import { type Kind, type RecordData, type State, stages, roles } from "./model";
+export interface Field {
+  key: keyof RecordData | string;
+  label: string;
+  type?: "number" | "date" | "checkbox" | "textarea" | "email" | "time";
+  options?: string[];
+  ref?: Kind;
+  required?: boolean;
+}
+const f = (
+  key: string,
+  label: string,
+  type?: Field["type"],
+  options?: string[],
+  ref?: Kind,
+  required = false,
+): Field => ({ key, label, type, options, ref, required });
+export const fields: Partial<Record<Kind, Field[]>> = {
+  clients: [
+    f("name", "Company name", undefined, undefined, undefined, true),
+    f("industry", "Industry"),
+    f("status", "Status", undefined, ["Active", "On Hold", "Inactive"]),
+    f("ownerId", "Account owner", undefined, undefined, "users"),
+    f("teamId", "Team", undefined, undefined, "teams"),
+    f("email", "Primary email", "email"),
+    f("phone", "Telephone"),
+    f("website", "Website"),
+    f("address", "Billing and office address", "textarea"),
+    f("location", "City / country"),
+    f("notes", "Commercial notes", "textarea"),
+    f("date", "Terms effective date", "date"),
+    f("reason", "Status / amendment reason"),
+  ],
+  contacts: [
+    f("name", "Contact name", undefined, undefined, undefined, true),
+    f("clientId", "Client", undefined, undefined, "clients", true),
+    f("designation", "Designation"),
+    f("status", "Contact role", undefined, [
+      "Primary",
+      "Hiring",
+      "Billing",
+      "Other",
+    ]),
+    f("email", "Email", "email"),
+    f("phone", "Telephone"),
+    f("preferences", "Communication preferences"),
+    f("notes", "Notes", "textarea"),
+  ],
+  jobs: [
+    f("name", "Job title", undefined, undefined, undefined, true),
+    f("clientId", "Client", undefined, undefined, "clients", true),
+    f("contactId", "Hiring contact", undefined, undefined, "contacts"),
+    f("status", "Status", undefined, [
+      "Draft",
+      "Open",
+      "On Hold",
+      "Closed",
+      "Cancelled",
+    ]),
+    f("openings", "Openings", "number", undefined, undefined, true),
+    f("minSalary", "Minimum annual salary (INR)", "number"),
+    f("maxSalary", "Maximum annual salary (INR)", "number"),
+    f("location", "Location / work mode"),
+    f("skills", "Skills and qualifications"),
+    f("priority", "Priority", undefined, ["Low", "Normal", "High", "Urgent"]),
+    f("userId", "Lead recruiter", undefined, undefined, "users"),
+    f("ownerId", "Supporting recruiter", undefined, undefined, "users"),
+    f("teamId", "Team", undefined, undefined, "teams"),
+    f("date", "Opened date", "date"),
+    f("expected", "Target joining date", "date"),
+    f("deadline", "Deadline", "date"),
+    f("notes", "Description / requirements", "textarea"),
+    f("reason", "Change reason"),
+  ],
+  candidates: [
+    f("name", "Full name", undefined, undefined, undefined, true),
+    f("email", "Email", "email", undefined, undefined, true),
+    f("phone", "Telephone"),
+    f("status", "Profile status", undefined, ["Active", "Archived"]),
+    f("location", "Current / preferred location"),
+    f("designation", "Current employer / designation"),
+    f("experience", "Experience (years)", "number"),
+    f("skills", "Skills / qualifications"),
+    f("tags", "Tags"),
+    f("currentSalary", "Current annual salary", "number"),
+    f("salary", "Expected annual salary", "number"),
+    f("notice", "Notice period (days)", "number"),
+    f("expected", "Availability date", "date"),
+    f("source", "Source", undefined, [
+      "Referral",
+      "Direct",
+      "CSV",
+      "Job board",
+      "Other",
+    ]),
+    f("userId", "Profile owner / sourced by", undefined, undefined, "users"),
+    f("consent", "Consent", undefined, ["Unknown", "Recorded", "Withdrawn"]),
+    f("availability", "Availability", undefined, [
+      "Available",
+      "Serving Notice",
+      "Not Looking",
+      "Joined",
+    ]),
+    f("preferences", "Work preferences"),
+    f("notes", "Consent source / notes", "textarea"),
+  ],
+  applications: [
+    f("name", "Reference", undefined, undefined, undefined, true),
+    f("candidateId", "Candidate", undefined, undefined, "candidates", true),
+    f("jobId", "Job", undefined, undefined, "jobs", true),
+    f("userId", "Recruiter", undefined, undefined, "users"),
+    f("expected", "Expected joining", "date"),
+    f("followUp", "Next follow-up", "date"),
+    f("probability", "Probability override (0–1)", "number"),
+    f("notes", "Feedback / notes", "textarea"),
+  ],
+  interviews: [
+    f("name", "Round title", undefined, undefined, undefined, true),
+    f(
+      "applicationId",
+      "Application",
+      undefined,
+      undefined,
+      "applications",
+      true,
+    ),
+    f("round", "Round number", "number"),
+    f("date", "Interview date", "date", undefined, undefined, true),
+    f("time", "Time (Asia/Calcutta)", "time", undefined, undefined, true),
+    f("duration", "Duration (minutes)", "number"),
+    f("userId", "Coordinator", undefined, undefined, "users"),
+    f("interviewer", "Interviewer names"),
+    f("mode", "Mode / venue / meeting text"),
+    f("status", "Status", undefined, [
+      "Scheduled",
+      "Rescheduled",
+      "Completed",
+      "Cancelled",
+      "No Show",
+    ]),
+    f("feedback", "Competency feedback", "textarea"),
+    f("rating", "Competency rating (1–5)", "number"),
+    f("recommendation", "Recommendation", undefined, [
+      "Proceed",
+      "Hold",
+      "Reject",
+    ]),
+    f("notes", "Next action / invitation preview", "textarea"),
+    f("reason", "Reschedule / cancellation / conflict override reason"),
+  ],
+  replacements: [
+    f("name", "Case name", undefined, undefined, undefined, true),
+    f("userId", "Assigned recruiter", undefined, undefined, "users"),
+    f("deadline", "Replacement deadline", "date"),
+    f("notes", "Contract conditions / review notes", "textarea"),
+  ],
+  placements: [
+    f("name", "Placement reference", undefined, undefined, undefined, true),
+    f("actual", "Actual joining date", "date"),
+    f("salary", "Final annual salary basis", "number"),
+    f("plannedIssue", "Planned invoice date", "date"),
+    f("notes", "Confirmation contact / evidence / amendment notes", "textarea"),
+    f(
+      "reason",
+      "Snapshot amendment reason",
+      undefined,
+      undefined,
+      undefined,
+      true,
+    ),
+  ],
+  tasks: [
+    f("name", "Task title", undefined, undefined, undefined, true),
+    f("userId", "Owner", undefined, undefined, "users"),
+    f("due", "Due date", "date", undefined, undefined, true),
+    f("priority", "Priority", undefined, ["Low", "Normal", "High"]),
+    f("status", "Status", undefined, [
+      "Pending",
+      "In Progress",
+      "Completed",
+      "Cancelled",
+    ]),
+    f("linkedKind", "Linked module", undefined, [
+      "clients",
+      "jobs",
+      "applications",
+      "interviews",
+      "placements",
+      "invoices",
+    ]),
+    f("linkedId", "Linked record ID"),
+    f("notes", "Notes", "textarea"),
+  ],
+  users: [
+    f("name", "Full name", undefined, undefined, undefined, true),
+    f("email", "Example email", "email", undefined, undefined, true),
+    f("role", "Role", undefined, roles),
+    f("teamId", "Team", undefined, undefined, "teams"),
+    f("managerId", "Manager", undefined, undefined, "users"),
+    f("status", "Status", undefined, ["Active", "Inactive"]),
+    f("scope", "Record scope", undefined, [
+      "All records",
+      "Managed teams",
+      "Assigned records",
+    ]),
+    f("reason", "Reassignment / status reason"),
+  ],
+  teams: [
+    f("name", "Team name", undefined, undefined, undefined, true),
+    f("managerId", "Manager", undefined, undefined, "users"),
+    f("status", "Status", undefined, ["Active", "Inactive"]),
+  ],
+  targets: [
+    f("name", "Target label", undefined, undefined, undefined, true),
+    f("userId", "Recruiter", undefined, undefined, "users", true),
+    f("targetType", "Measure", undefined, [
+      "Submissions",
+      "Interviews",
+      "Placements",
+      "Net fees",
+    ]),
+    f("date", "Period start", "date"),
+    f("due", "Period end", "date"),
+    f("amount", "Target", "number", undefined, undefined, true),
+  ],
+  cash: [
+    f("name", "Entry description", undefined, undefined, undefined, true),
+    f(
+      "date",
+      "Transaction / forecast date",
+      "date",
+      undefined,
+      undefined,
+      true,
+    ),
+    f("status", "Type", undefined, ["Actual", "Forecast"]),
+    f("category", "Category"),
+    f("amount", "Outflow (INR)", "number", undefined, undefined, true),
+    f("notes", "Management notes", "textarea"),
+  ],
+};
+export const modules = [
+  ["dashboard", "Overview"],
+  ["clients", "Clients"],
+  ["jobs", "Jobs"],
+  ["candidates", "Candidates"],
+  ["pipeline", "Pipeline"],
+  ["interviews", "Interviews"],
+  ["offers", "Offers"],
+  ["joinings", "Joinings"],
+  ["replacements", "Replacements"],
+  ["performance", "Recruiter Performance"],
+  ["invoices", "Invoices"],
+  ["payments", "Payments"],
+  ["collections", "Collections"],
+  ["forecast", "Revenue Forecast"],
+  ["cashflow", "Cash Flow"],
+  ["reports", "Reports"],
+  ["tasks", "Tasks & Activities"],
+  ["users", "Users & Roles"],
+  ["settings", "Settings"],
+];
+export function label(s: State, k: Kind, id?: string) {
+  return s.data[k].find((r) => r.id === id)?.name || id || "—";
+}
+export function get(r: RecordData, path: string): unknown {
+  return path
+    .split(".")
+    .reduce<unknown>(
+      (a, key) =>
+        a && typeof a === "object"
+          ? (a as Record<string, unknown>)[key]
+          : undefined,
+      r,
+    );
+}
+export const termFields: Field[] = [
+  f("terms.method", "Fee method", undefined, ["Percentage", "Fixed"]),
+  f("terms.value", "Fee percentage / fixed INR", "number"),
+  f("terms.salaryBasis", "Annual salary basis"),
+  f("terms.days", "Payment duration", undefined, ["30", "45", "60", "90"]),
+  f("terms.trigger", "Due-date trigger", undefined, [
+    "Invoice date",
+    "Joining date",
+    "Client acceptance",
+  ]),
+  f("terms.guarantee", "Guarantee days", "number"),
+  f("terms.conditions", "Replacement conditions", "textarea"),
+];
+export const stageOptions = stages;

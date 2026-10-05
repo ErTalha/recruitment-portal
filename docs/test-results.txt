@@ -1,0 +1,29 @@
+PASS Seed minimum counts and every foreign key resolves
+PASS Seed invoices follow actual joining; no duplicate active applications
+PASS AC-01 client defaults copied and later terms do not rewrite snapshots
+PASS AC-02 independent applications and duplicate active protection
+PASS AC-03 CSV handles commas, quotes and real rows
+PASS AC-04 progression validates recruiter, consent, held job and history
+PASS AC-05 rescheduling retains date and updates linked reminder
+PASS AC-06 offer revision uses current salary and creates joining tracker
+PASS AC-07 joining confirmation is idempotent and consumes one original slot
+PASS AC-08 draft fees counted once; issue moves fee into invoice and blocks duplicate
+PASS AC-09 four durations and alternative calendar triggers
+PASS AC-10 partial and excess receipts; allocation never duplicates cash
+PASS AC-11 date control updates ageing without editing invoice
+PASS AC-12 promise and dispute preserve contractual ageing
+PASS AC-13 paid credit release and refund reconcile cash and history
+PASS AC-14 reversal reopens invoice and preserves original allocation
+PASS AC-15 free replacement produces no second fee or original vacancy
+PASS AC-16 recruiter fee and collection shares reconcile after reassignment
+PASS Forecast exact capacity limit: two 90% candidates / one vacancy
+PASS Percentage offer salary revision, line discounts and rounded tax
+PASS Later-period credit affects later period independently of invoice date
+PASS Cross-client, excessive allocations, invalid shares and conflicting merges block
+PASS AC-18 users duplicate email validation and historical attribution survives deactivation
+PASS AC-19 JSON persistence round-trip and seed reset are consistent
+PASS AC-20 dashboard and supporting invoice balances use same selectors
+PASS AC-17 filtered CSV values, quoting, totals and generation context
+PASS Storage failure falls back safely; JSON writes round-trip
+
+27 focused verification groups passed. Browser-only AC-17 export and responsive/print/persistence checks are documented separately.

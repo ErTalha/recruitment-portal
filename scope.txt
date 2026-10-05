@@ -1,0 +1,516 @@
+Recruitment Management Software Scope of Work
+Prepared for client review and frontend prototype planning
+Prepared by Noorisys Technologies Pvt Ltd
+Version 1.0 | 5 October 2026
+This document defines the recruitment agency workflows, user responsibilities, business rules and acceptance criteria for a connected Super Admin demonstration. It provides a functional baseline for subsequent production scoping.
+The initial prototype is frontend only. All records, calculations, payments and communication actions use fictional local data.
+Document contents
+1 Purpose and intended outcome
+2 Scope assumptions and decisions for review
+3 Users and responsibility model
+4 Business workflow
+5 Common interface and record behaviour
+6 Detailed functional requirements
+7 Data relationships and minimum record model
+8 Business calculations and controls
+9 Prototype pages and navigation
+10 Frontend demonstration delivery specification
+11 Demonstration acceptance scenarios
+12 Deliverables and completion criteria
+13 Exclusions and future scope
+14 Client confirmation checklist
+15 Recommended implementation sequence
+
+1 Purpose and intended outcome
+The proposed Recruitment Management Software will give a recruitment agency one connected view of its clients, vacancies, candidates, recruiter activity, interviews, selections, joinings, replacement obligations, invoices and collections. Management will be able to trace a recruitment opportunity from an open position through to the associated fee and payment.
+This Scope of Work defines the proposed business functionality for stakeholder review and the exact demonstration boundary for an initial frontend prototype. The prototype will allow a client to explore every included function from one Super Admin interface using fictional, linked records. Production development, hosting commitments, implementation timelines and commercial pricing require a separate agreement after the scope and business rules are confirmed.
+The prototype is a demonstration deliverable. It will contain browser-side interactions and calculations only. It will not contain a real backend, database, authentication service, payment service or external API integration.
+2 Scope assumptions and decisions for review
+The following are proposed defaults, rather than confirmed client policies. They make the scope implementable and the demonstration internally consistent. The client can amend them before production estimation.
+Business model: a recruitment agency handling permanent placements for multiple corporate clients. Contract staffing, payroll processing and temporary workforce timesheets are outside this baseline.
+Organisation: one agency with multiple internal users and teams. Independent tenants, franchises and branch-level accounting are outside this baseline.
+Language and currency: British English interface with INR as the initial demonstration currency. Currency must be displayed explicitly. Multi-currency consolidation and exchange-rate conversion are outside the baseline.
+Access: production role-based access is specified as proposed behaviour. The prototype opens directly as Super Admin and demonstrates user and permission configuration without enforcing real security.
+Placement fee: either a fixed amount per placement or a percentage of an agreed annual salary basis. The salary basis is recorded explicitly and is subject to client confirmation.
+Payment terms: 30, 45, 60 or 90 calendar days, initially measured from invoice issue date. Joining date or client acceptance date can be selected as alternative contractual triggers. Missing trigger dates prevent a due date from being calculated.
+Invoice trigger: confirmed joining makes the placement eligible for invoicing. The Super Admin reviews and issues the invoice manually. Selection or offer acceptance alone does not generate an invoice.
+Replacement guarantee: a configurable period separate from payment terms, with 90 calendar days as the initial example. A replacement does not automatically generate a second billable fee.
+Revenue views: pipeline forecast, billable but uninvoiced fees, net invoiced fees and cash collected are separate measures. Accounting revenue recognition is not implemented.
+Cash flow: the dashboard covers recruitment-related cash collections and optional manually entered projected or actual outflows. It is a management view, not a complete accounting system.
+Communication: tasks, internal notifications and recorded communication logs are included. Actual email, SMS, WhatsApp, job-board or calendar delivery is excluded from the prototype.
+Personal information: all prototype candidate, client and user information is fictional. Candidate consent and data retention policies must be agreed before handling live data.
+3 Users and responsibility model
+All actions described below are available to Super Admin in the prototype. Separate client, candidate and recruiter portals are not required for the demonstration.
+Proposed role
+Operational responsibility
+Proposed production visibility
+Super Admin
+Organisation settings, users, permissions and every operational or financial action
+All records and configuration
+Founder or Admin
+Business oversight, approvals, targets and management reporting
+Agency-wide operations and finances as permitted
+Recruitment Manager
+Team allocation, jobs, pipelines, interviews, joinings and replacements
+Managed teams and assigned clients; financial summaries if permitted
+Recruiter
+Candidate sourcing, applications, submissions, interviews and follow-ups
+Assigned jobs and applications plus permitted candidate database access
+Finance Executive
+Invoice review, receipts, credit notes, collections and cash reporting
+Billing records and the placement details needed for finance
+
+Permissions will distinguish view, create, edit, archive, assign, approve, export and financial actions such as issue invoice, record receipt and create credit note. Record visibility and action permission are separate settings. Proposed permission presets will be editable; Super Admin retains full access.
+4 Business workflow
+1. Create the client, contacts, commercial terms and account owner.
+2. Create a job under that client, record vacancies and fee terms, and allocate recruiters.
+3. Add or search candidates in the ATS database, then create a separate application for each candidate and job combination.
+4. Screen candidates, submit them to the client and record feedback.
+5. Schedule and complete one or more interview rounds, recording outcomes and next actions.
+6. Record selection, offer terms and candidate acceptance or rejection.
+7. Track the expected joining date, confirm actual joining and create a placement record.
+8. Monitor the replacement guarantee and resolve any eligible replacement cases.
+9. Review the billable fee, create a draft invoice and issue it with the agreed payment terms.
+10. Track the due date, receivable, overdue balance and collection follow-ups.
+11. Record and allocate payments or credits, then update dashboards and reports.
+Every job links to a client. Every application links to one candidate and one job. Interviews and offers link to applications. A placement links to the successful application, and invoice lines link to placements. Receipts are allocated to invoices. Replacement cases link to the original placement and any replacement placement.
+5 Common interface and record behaviour
+Provide a persistent navigation menu, page title, breadcrumbs where helpful, global record search, quick-create actions and an internal notification centre.
+Use searchable, filterable, sortable and paginated lists. Retain filters while opening a record and returning to the list. Allow filters to be cleared and show an informative empty state.
+Provide create and edit forms, record details, related-record links, status badges, activity history and contextual actions. Required fields must be marked and invalid input must display a useful inline message.
+Archive referenced master records instead of removing their relationships. Hard deletion is restricted to unreferenced drafts with a confirmation step. Issued financial records cannot be silently edited or deleted.
+Show dates in DD MMM YYYY format, percentages clearly and monetary values with currency and consistent decimal precision. Store date-only business dates without unintended timezone shifts.
+Record the actor, date, action and reason for material status, assignment and financial changes. Prototype history is local and illustrative, not an immutable audit service.
+CSV exports must contain the filtered underlying rows, column headings and applicable totals. Printable views must represent the displayed record or report. No external transmission is implied.
+Show success, validation, cancellation, empty and persistence-failure states. Avoid controls that appear functional but do nothing.
+6 Detailed functional requirements
+6 1 Client management
+Purpose: maintain each hiring company, its contacts, commercial arrangements and account history.
+Fields: client code, company name, industry, website, office and billing addresses, city, country, primary contact, additional contact name and designation, email, telephone, account owner, assigned team, status, billing contact, optional tax identifier, preferred payment term, due-date trigger, fee method, default fee value, salary basis, replacement period, replacement conditions and notes.
+CL-01 Create, view, edit and archive clients. Support Active, On Hold and Inactive statuses. Warn about similar company names and duplicate primary contact details without automatically merging companies.
+CL-02 Add multiple contacts and identify primary hiring and billing contacts. Record contact preferences and maintain notes and communication history.
+CL-03 Configure client-level fee terms, replacement conditions and payment cycles. Capture effective date and commercial notes. Snapshot applicable terms on each job and placement so a later client change does not rewrite history.
+CL-04 Assign an account owner and team. Filter clients by owner, status, industry and outstanding balance.
+CL-05 Provide detail tabs for Overview, Contacts, Jobs, Applications, Placements, Replacements, Invoices, Payments and Activities. Financial tabs show net invoiced fees, collections, outstanding and overdue amounts separately.
+CL-06 Warn before making a client inactive while open jobs or unpaid invoices exist. Historical financial records remain available and collectible.
+Acceptance: create a client with 45-day terms, create a linked job and confirm that its defaults are copied. Changing the client to 60 days must not change existing issued invoice due dates.
+6 2 Job and position management
+Purpose: track client hiring requirements and the effort needed to fill each vacancy.
+Fields: job reference, client, hiring contact, title, department, employment type, location, work mode, openings, experience range, salary range and currency, skills, qualifications, description, priority, target joining date, opened date, deadline, assigned recruiters, account owner, fee terms, guarantee terms and status.
+JB-01 Create, edit, duplicate, view, place on hold, cancel, close and reopen jobs. Duplicating a job creates a new reference and does not copy applications, interviews or invoices.
+JB-02 Use Draft, Open, On Hold, Closed and Cancelled statuses. Record reasons for hold, cancellation and reopening. On Hold blocks new submissions until reopened; Cancelled blocks further progression but preserves history.
+JB-03 Allocate a lead recruiter and supporting recruiters. Record allocation dates and changes. Recruiter assignment must not imply automatic financial credit.
+JB-04 Display application counts by stage, scheduled interviews, offers, joinings, filled positions, remaining vacancies and estimated fee opportunity.
+JB-05 Allow job-specific overrides of client commercial terms before placement confirmation. Show the source of each term and require a reason for changes after an application reaches offer stage.
+JB-06 Link candidates to jobs through applications. Prevent duplicate active candidate-job applications. Archive duplicate applications only after reviewing their history.
+JB-07 Warn when confirmed active placements would exceed openings. Require a reasoned admin override. Replacement placements inherit the original vacancy and must not increase filled positions a second time.
+JB-08 Close a job with a recorded reason, including filled, withdrawn by client or no suitable candidates. Do not close automatically merely because there are selected candidates.
+Acceptance: a job with three openings and two active original placements shows two filled and one remaining. A replacement for either placement does not consume a fourth vacancy.
+6 3 ATS and candidate database
+Purpose: maintain reusable candidate profiles independently from their applications.
+Fields: candidate reference, full name, email, telephone, current location, preferred locations, total experience, current employer and designation, skills, qualifications, current salary, expected salary, currency, notice period, availability date, work preferences, sourcing channel, sourced by, profile owner, tags, resume file metadata, consent status and notes.
+AT-01 Create, edit, view and archive candidates. Distinguish global profile availability from job-specific application stage.
+AT-02 Search by name, contact details, skills, experience, location, salary expectations, notice period, availability, source and tags. Provide saved filter sets stored locally in the prototype.
+AT-03 Add a resume and supporting documents. The prototype can preview a bundled sample resume or locally selected supported file and store file metadata. It must not claim to parse resumes or persist uploaded file contents after refresh unless explicitly implemented locally.
+AT-04 Warn about duplicate normalised email or telephone values. Provide a reviewed merge preview for compatible duplicate profiles, preserve related applications and notes, and reject conflicting duplicate candidate-job applications until they are resolved.
+AT-05 Demonstrate CSV candidate import with a downloadable template, column mapping, row validation, duplicate review and an import summary. Actual valid rows create local candidate records.
+AT-06 Shortlist a candidate for a job, assign a recruiter, add notes and view all applications, interviews, offers and joining history from the profile.
+AT-07 Record consent status as Unknown, Recorded or Withdrawn, with date and source. Flag withdrawn consent and block new submissions in the demonstration until it is updated through an explicit action.
+AT-08 Mark availability as Available, Serving Notice, Not Looking or Joined. Do not overwrite separate application stages when availability changes.
+Acceptance: one candidate can have applications for two different jobs with different stages and recruiters. Updating a shared telephone number is visible in both applications.
+6 4 Candidate pipeline
+Purpose: manage the progress of each candidate against each job.
+Fields: application reference, candidate, job, client, assigned recruiter, submission date, current stage, stage-entered date, rejection or withdrawal reason, stage notes, next follow-up date, forecast probability and expected joining date.
+PL-01 Provide Kanban and table views with client, job, recruiter, stage, source and date filters. Cards show candidate, job, recruiter, time in stage and next action.
+PL-02 Use New, Screening, Shortlisted, Submitted to Client, Interviewing, Selected, Offer Sent, Offer Accepted and Joined, plus Rejected, Withdrawn and On Hold. The Joined transition is completed through actual joining confirmation.
+PL-03 Move an application using drag and drop or a keyboard-accessible Change Stage action. Both paths use the same validation and confirmation behaviour.
+PL-04 Require a recruiter before submission, at least one completed interview before normal selection, offer details before Offer Sent, acceptance date before Offer Accepted and actual joining details before Joined. Permit an authorised fast-track exception with a reason when a client does not require interviews.
+PL-05 Record stage history and feedback. Rejected and Withdrawn require a reason. Reopening a terminal application requires a reason and restores a valid previous active stage.
+PL-06 Show candidate submission history and an unsent submission preview. Record submission as a local activity only; no message is sent to a client.
+PL-07 Provide bulk recruiter assignment and bulk stage actions with a per-record validation summary. Invalid records remain unchanged; the user can review and confirm the eligible subset.
+PL-08 Flag overdue follow-ups and applications exceeding a configurable stage-age threshold. Provide direct links to resolve them.
+Acceptance: moving a candidate to Offer Accepted updates the application, forecast and joining queue. Moving to Joined opens joining confirmation rather than changing only a badge.
+6 5 Interview tracking
+Purpose: coordinate interview rounds and retain structured feedback.
+Fields: application, round number and type, interviewer names, date, time, timezone, duration, mode, venue or meeting-link text, coordinator, status, feedback, competency ratings, recommendation and next action.
+IN-01 Schedule multiple rounds for an application. Provide calendar and list views, interview details and links to the candidate, job and client.
+IN-02 Support Scheduled, Rescheduled, Completed, Cancelled and No Show. Retain old dates and the reason for rescheduling or cancellation.
+IN-03 Record feedback against configurable criteria and a recommendation such as Proceed, Hold or Reject. Mark the round completed only after the minimum outcome information is entered.
+IN-04 Warn about overlapping interviews for the same candidate or internal coordinator. Permit an admin override with a reason. External interviewer availability is not checked through an external calendar.
+IN-05 Create internal reminders and follow-up tasks. Display a draft invitation preview without sending an invitation or creating a calendar event.
+IN-06 Interview completion does not automatically mark a candidate selected. The selection action must be explicit.
+Acceptance: rescheduling an interview changes the calendar and list, retains the old appointment in history and updates the associated task.
+6 6 Selection and offer management
+Purpose: record hiring decisions and offer outcomes separately from joining.
+Fields: application, selected date, selecting contact, offered role, annual salary and salary basis, salary currency, location, offer date, acceptance deadline, expected joining date, candidate response date, offer document metadata, fee estimate and decision notes.
+OF-01 Record selection or rejection and the client decision. Support multiple offer revisions with one current version and visible history.
+OF-02 Prepare an offer record, preview the terms and record Offer Sent as a local event. There is no external document-signing or email service.
+OF-03 Track Draft, Sent, Accepted, Declined, Expired and Withdrawn offer statuses. A declined, expired or withdrawn offer requires an outcome note.
+OF-04 Record accepted salary, acceptance date and expected joining date. Recalculate the expected fee using the agreed fee method and salary basis.
+OF-05 Create a joining tracker when the offer is accepted. Follow up on offer deadlines and joining dates. No-show or failure-to-join remains distinct from a post-joining replacement case.
+Acceptance: revising the offer salary recalculates the fee estimate but does not alter an already issued invoice without a separate financial adjustment.
+6 7 Joining and placement tracking
+Purpose: confirm the start of employment and establish a billable placement.
+Fields: application, candidate, client, job, offer, expected and actual joining dates, final salary basis, final fee, primary recruiter, attribution shares, joining evidence metadata, joining confirmation contact, placement status, invoice eligibility and guarantee end date.
+JO-01 Display upcoming, overdue and completed joinings. Support Expected, Joining Confirmed, Deferred, Failed to Join and Employment Ended tracking outcomes.
+JO-02 Record joining deferral with a new expected date and reason. Mark failure to join with a reason without creating a billable placement.
+JO-03 Confirm actual joining only for an accepted offer, or through a reasoned admin exception. Create one placement and move the application to Joined in the same local action.
+JO-04 Snapshot fee, payment and guarantee terms, final salary and recruiter attribution at confirmation. Prevent repeated confirmation from creating duplicate placements.
+JO-05 Show Billable Uninvoiced, Draft Invoice Linked, Invoiced and Non Billable billing indicators. Display related invoices, receipts and replacement records.
+JO-06 Record employment end date and reason separately from the initial joining. Offer a replacement assessment when the event may qualify under the stored guarantee terms.
+JO-07 Correct a confirmed joining through a reasoned amendment. If an issued invoice exists, display the financial impact and require an explicit adjustment action instead of changing that invoice silently.
+Acceptance: confirming a joining creates exactly one placement, updates vacancy counts and makes one fee eligible for invoicing.
+6 8 Replacement tracking
+Purpose: manage contractual replacement obligations without duplicating jobs, vacancy counts or revenue.
+Fields: original placement, request date, employment end date, reason, guarantee period, eligibility result, reviewed by, review notes, replacement deadline, assigned recruiter, replacement application, replacement placement, financial treatment and closure reason.
+RP-01 Calculate and display guarantee end date from the original joining date and stored guarantee duration. Show expiry alerts and replacement requests.
+RP-02 Create a replacement case and assess eligibility using dates and recorded client terms. Support Requested, Under Review, Approved, In Progress, Fulfilled, Rejected and Closed statuses.
+RP-03 Allow a reasoned eligibility override. Record whether the agreed resolution is replacement without an additional fee, billable replacement, credit, refund or no financial adjustment.
+RP-04 Search and assign a replacement candidate through a new application linked to the same job and replacement case. Retain the original placement and its financial history.
+RP-05 Confirm replacement joining and mark the case fulfilled. The replacement remains linked to the original vacancy and shows Non Billable unless an additional fee has been explicitly agreed.
+RP-06 Record whether a new guarantee begins on replacement joining. The initial demonstration default is no restart; any restart is an explicit agreed term.
+RP-07 Treat credit notes and refunds as separate financial actions. Replacement approval alone does not cancel an invoice, erase a receipt or reduce cash collected.
+RP-08 Prevent duplicate open cases for the same original placement unless an admin records a distinct request and reason.
+Acceptance: a free replacement produces a second placement record, one filled vacancy and one original fee. A credit changes receivables only when the credit note is issued.
+6 9 Recruiter allocation and performance
+Purpose: measure operational output and financial attribution consistently.
+Fields: recruiter, team, manager, active status, assigned clients and jobs, monthly activity targets, placement target, net fee target and attribution share.
+RE-01 Maintain recruiter profiles through user management and assign recruiters to jobs and applications. Reassignment records the old and new owners.
+RE-02 Configure period targets for submissions, completed interviews, confirmed original placements and attributable net fees. Compare actuals to targets.
+RE-03 Show sourced candidates, active applications, submissions, completed interviews, selections, accepted offers, original joinings, replacement joinings, failed joinings and active replacement cases separately.
+RE-04 Attribute fees to one recruiter by default, or split shares across contributors. Shares must total 100 per cent for a billable placement. Snapshot shares and apply them consistently to invoice fees and credits.
+RE-05 Show net invoiced fee attribution and attributable collections separately. Recruiter collections use the fee portion of allocated payments, excluding tax, apportioned against the invoice line balance.
+RE-06 Provide recruiter comparison, target achievement, stage conversion and cohort-based time-to-fill. Open a drill-down to the supporting records.
+RE-07 Free replacement joinings count as replacement activity, not new fee-generating placements. Changing current job ownership does not transfer historical fee credit.
+Acceptance: a placement split 60 and 40 per cent attributes a fee of INR 100,000 as INR 60,000 and INR 40,000, without changing the agency total.
+6 10 Payment cycle tracking
+Purpose: apply the contractual 30, 45, 60 or 90-day cycle and expose collection dates clearly.
+Fields: client, term days, trigger type, trigger date, calculated due date, contractual due-date override, override reason, expected collection date and payment commitment history.
+PC-01 Configure one of the four term durations at client level and override it for a job or placement. Snapshot the final invoice terms before issue.
+PC-02 Calculate due date as trigger date plus term days using calendar days. Do not assume working-day rules or bank-holiday adjustment.
+PC-03 If joining or acceptance is the selected trigger, require the relevant date. For grouped placements with different trigger dates, require separate invoices in the baseline.
+PC-04 Display cycle duration, trigger and due date on placement finance details and invoice preview. An invoice with missing required dates cannot be issued.
+PC-05 Allow a reasoned contractual due-date amendment. Maintain the original due date and amendment history.
+PC-06 Record promised or expected collection dates separately. They affect collection forecasts but do not reset invoice overdue days or replace the contractual due date.
+PC-07 Provide due-this-week, due-this-month and overdue views by cycle and client.
+Acceptance: a 30-day invoice issued on 1 October 2026 is due on 31 October 2026 under the proposed invoice-date rule. A promise to pay on 10 November changes the collection forecast, not the due date.
+6 11 Invoice management
+Purpose: create traceable recruitment invoices and controlled adjustments.
+Fields: draft reference, issued invoice number, client and billing details, issue date, linked placements and line descriptions, salary basis, fee method and amount, discount, illustrative tax label and rate, totals, payment term, trigger date, due date, billing notes and issue status.
+IV-01 List eligible uninvoiced placements and select one or more for a draft. Group only the same client, currency, payment duration and trigger date. A placement fee can belong to one active draft or one non-cancelled issued invoice. Reissuing after cancellation preserves the original reference history; additional charges require explicit approval.
+IV-02 Calculate fee lines, permitted discounts and optional illustrative tax. Support line review and a professional printable invoice preview. No statutory tax filing or tax-rule integration is included.
+IV-03 Keep draft numbers separate from issued invoice numbers. Validate billable placement, billing details, amount, trigger date and term before issuing. Issuing creates a receivable and locks the financial values.
+IV-04 Display Draft, Issued and Cancelled document states separately from Unpaid, Partially Paid and Paid settlement states. Overdue and Disputed are additional flags, not replacements for the settlement status.
+IV-05 Allow edits or removal of draft lines. Cancellation of an issued unpaid invoice requires a reason, reverses its receivable and retains its number and history. Invoices with payments or issued credits must be adjusted and settled explicitly before cancellation.
+IV-06 Create partial or full credit notes against invoice lines with reasons. Credits cannot exceed the uncredited invoice amount. Preview, issue and print the credit; issued credits are preserved in history.
+IV-07 After a credit creates an over-settlement, show a client credit or refund liability. Keep the original receipt and provide explicit refund or credit-transfer actions.
+IV-08 Preview a billing email or collection reminder as an unsent draft. Printed documents and local downloads do not imply delivery to the client.
+Acceptance: issuing a draft changes receivables, invoiced fee reports and client totals immediately. Issuing the same placement again is blocked.
+6 12 Receipts and receivables
+Purpose: record collections and reconcile them against outstanding invoices.
+Fields: receipt reference, client, received date, amount, currency, payment method, transaction reference, notes, allocations, unallocated amount, refund records and reversal history.
+AR-01 Record payments manually as local demonstration records. Support bank transfer, cheque, cash and other descriptive methods without processing money.
+AR-02 Allocate one receipt to one or several invoices of the same client and currency. Prevent allocation beyond a positive outstanding balance and prevent total allocation exceeding the receipt.
+AR-03 Allow an excess payment to remain as unapplied client credit. Display available credit and apply it through an explicit allocation action.
+AR-04 Show original total, credits, allocated receipts, refunds, outstanding balance and settlement status for each invoice. Provide a client statement and receipt preview.
+AR-05 Reverse or correct a receipt through a linked reversal and reason. Reopen the affected invoice balance and preserve the original record.
+AR-06 Record a refund against an available refundable credit balance with date, method and reference. Refunds reduce net cash collected and the available credit; they do not disappear into invoice editing.
+AR-07 Prevent cross-client or cross-currency allocations. Display validation errors and a reconciliation summary before confirmation.
+Acceptance: an invoice of INR 100,000 receiving INR 40,000 becomes Partially Paid with INR 60,000 outstanding. On a separate unpaid invoice of INR 100,000, a receipt of INR 120,000 leaves INR 20,000 unapplied credit.
+6 13 Overdue payments and collections
+Purpose: prioritise debt collection while preserving contractual history.
+OD-01 List issued invoices with a positive outstanding balance and due date before the current demonstration date. Show days overdue, client, owner, amount and last follow-up.
+OD-02 Provide Current, 1 to 30, 31 to 60, 61 to 90 and Over 90 days ageing buckets based on contractual due date.
+OD-03 Record calls, emails, promised dates, dispute reasons, collection notes and next actions. Communications are recorded or previewed only in the prototype.
+OD-04 Mark a dispute with owner, reason, raised date and resolution. Disputed balances remain within receivables and ageing, with a separate disputed subtotal.
+OD-05 Set an expected collection date and probability for forecasting. Overdue invoices without a commitment are grouped as unscheduled overdue rather than assumed to be collected immediately.
+OD-06 Close a collection task when settled while retaining history. Track missed payment promises and show internal alerts.
+Acceptance: an unpaid invoice due yesterday is one day overdue. Paying part of it reduces the overdue amount but does not reset its age.
+6 14 Expected revenue
+Purpose: show future fee opportunities without mixing them with invoiced fees or collections.
+ER-01 Forecast unplaced applications in the selected expected joining period using estimated fee and configurable stage probability. Provide unweighted and probability-weighted values.
+ER-02 Use illustrative defaults of New 0 per cent, Screening 10, Shortlisted 20, Submitted 30, Interviewing 50, Selected 70, Offer Sent 80 and Offer Accepted 90. Exclude Rejected, Withdrawn, On Hold and Joined from the unplaced pipeline forecast.
+ER-03 Cap the sum of candidate probabilities for each job at its remaining vacancies using the calculation in Section 8. Do not sum the full fee of every competing candidate as if all will join.
+ER-04 Show billable uninvoiced placements separately at their agreed fee values. Include draft-linked fees as a clearly identified subset and exclude placements with issued invoices, as defined in Section 8.
+ER-05 Show forecast by client, job, recruiter and expected joining month, with missing dates reported as Unscheduled. Changes in salary, fees, stages and probabilities update the view.
+ER-06 Provide forecast assumptions and underlying record drill-downs. Estimated pipeline revenue is not presented as guaranteed income or accounting revenue.
+Acceptance: two competing candidates each with 90 per cent probability for one remaining vacancy must not produce 1.8 expected hires. A joined placement exits the candidate forecast.
+6 15 Cash flow dashboard
+Purpose: compare money received with expected collections and planned outflows.
+CF-01 Show gross receipts, refunds, net cash collected, due receivables, overdue receivables, expected receipts and optional outflows for selected periods.
+CF-02 Forecast issued invoice balances using expected collection dates where present, otherwise future contractual due dates. Present unscheduled overdue balances separately. Display a forecast confidence indicator.
+CF-03 Optionally estimate future collections for uninvoiced placements using a planned invoice date and snapshotted payment terms. Keep these lower-confidence amounts separate from issued invoice receivables and pipeline opportunities.
+CF-04 Allow manual projected and actual cash-outflow entries with date, category, amount, currency and notes. These entries are not a purchasing, expense-approval or payroll module.
+CF-05 Show opening cash entered for the demonstration, monthly cash movements and projected closing cash. If outflows or opening cash are absent, label the view as collections forecasting rather than a complete cash balance.
+CF-06 Provide monthly actual and forecast charts, 30, 60 and 90-day outlooks, client concentration and drill-downs to invoices or cash entries.
+Acceptance: invoicing increases receivables, but does not increase actual cash. Recording a receipt increases actual cash and reduces the relevant invoice forecast to its remaining balance.
+6 16 Client and recruiter reports
+Purpose: expose operational and financial performance with consistent filters and definitions.
+RT-01 Provide client revenue reports showing original placements, free replacements, gross fees, discounts, credit-adjusted net fees, tax, billed totals, allocated collections, unapplied credit, outstanding and overdue balances.
+RT-02 Provide recruiter reports showing activity, submissions, interviews, selections, accepted offers, original joinings, replacements, fee attribution, collection attribution and target achievement.
+RT-03 Include open jobs, vacancy ageing, pipeline funnel, interview outcomes, offer acceptance, joining outcomes, replacement register, invoice register, receipt register, receivable ageing and forecast reports.
+RT-04 Filter by date basis, date range, client, recruiter, team, job and status as applicable. Display which date basis is used, such as invoice issue date, actual joining date or receipt date.
+RT-05 Financial reports use snapshotted attribution. Funnel reports use defined application cohorts rather than dividing unrelated period totals.
+RT-06 Support CSV download and printable report views with filters, generation date, rows and totals. Totals must reconcile with the filtered source records.
+RT-07 Clicking a metric opens the filtered underlying list. Display empty states and avoid undefined percentages when a denominator is zero.
+Acceptance: net invoiced fees in the client report, recruiter report and management dashboard reconcile for the same period and filters.
+6 17 Admin and founder dashboard
+Purpose: provide management visibility and actionable exceptions.
+DA-01 Display active clients, open jobs, remaining vacancies, active applications, interviews due, accepted offers, upcoming joinings, confirmed original placements and open replacements.
+DA-02 Show pipeline expected fees, uninvoiced billable fees, net invoiced fees, receipts, refunds, outstanding and overdue amounts as individually labelled cards.
+DA-03 Provide pipeline distribution, monthly fees and collections, top clients, recruiter target performance, payment-cycle exposure and forecast charts.
+DA-04 Display pending decisions, ageing applications, interview follow-ups, joining delays, expiring guarantees, eligible uninvoiced placements, due invoices and missed collection promises.
+DA-05 Provide date, client, recruiter and team filters with metric-specific date definitions. Point-in-time values such as outstanding balances are labelled as of the demonstration date.
+DA-06 Open supporting records from cards and charts. Provide quick actions for client, job, candidate, interview, joining, invoice and receipt creation.
+Acceptance: a joining, invoice issue and partial receipt produce different, correct changes across the operational and financial cards without duplicate counting.
+6 18 Users roles and login behaviour
+Purpose: describe future access control while demonstrating all functions through Super Admin.
+US-01 Create, edit, deactivate and reactivate internal users with name, email, role, team, manager and status. Duplicate user emails are blocked.
+US-02 Configure the proposed roles and a module-by-action permission matrix. Include financial visibility, exports and record scope settings.
+US-03 Show role presets and a permission preview from Super Admin. The preview may display allowed and restricted examples but must not hide Super Admin modules or require a separate login.
+US-04 Demonstrate invitation, reset-password and account-status actions through local status changes and explanatory previews only. No email, password storage, authentication token or identity provider is required.
+US-05 Production login, password reset, session expiry and permission enforcement are intended future functions, subject to technical design. They are not prototype deliverables.
+US-06 Deactivating a recruiter preserves historical attribution and prompts reassignment of open work.
+Acceptance: Super Admin can explore every module directly. Modifying a Recruiter permission changes the permission preview while keeping Super Admin access intact.
+6 19 Settings activities and notifications
+Purpose: support configuration and follow-up across the main modules.
+ST-01 Maintain agency profile, display currency, timezone, date preferences, invoice prefix, contact information and sample branding text.
+ST-02 Manage industries, skills, qualifications, sources, job priorities, interview types, rejection reasons, replacement reasons, activity types and outflow categories. Referenced options can be deactivated but retain historical labels.
+ST-03 Configure fee defaults, four payment durations, due triggers, guarantee durations, forecast probabilities and internal reminder thresholds.
+ST-04 Create tasks linked to clients, jobs, applications, interviews, placements or invoices, with owner, due date, priority, status and notes. Support Pending, In Progress, Completed and Cancelled.
+ST-05 Maintain activity timelines and internal notifications for due tasks, interviews, joinings, guarantees and unpaid invoices. Notifications open the relevant record and can be marked read.
+ST-06 Provide demo controls to change the as-of date, reset all demonstration data with confirmation and inspect the scenario guide. Reset restores a consistent seed dataset.
+ST-07 Show local changes in an illustrative activity log. No claim of tamper-proof audit storage is made.
+Acceptance: changing the demonstration date updates overdue days, upcoming alerts and guarantee expiry consistently across all modules.
+7 Data relationships and minimum record model
+The following is a logical business model. For the prototype, records are JavaScript objects stored in browser memory or local storage, not database tables.
+Record
+Required relationships
+Important separation
+Client and contact
+Contacts belong to a client; jobs and invoices reference the client
+Client defaults versus historical term snapshots
+Job
+One client; one or more assigned recruiters
+Openings versus individual applications
+Candidate
+Shared profile with many applications
+Candidate availability versus application stage
+Application
+One candidate and one job; assigned recruiter
+Unique active candidate and job combination
+Interview and offer
+Each references an application
+Interview outcome versus hiring decision
+Placement
+Successful application; term and attribution snapshots
+Original placement versus replacement placement
+Replacement case
+Original placement; optional replacement application and placement
+Operational fulfilment versus financial adjustment
+Invoice and invoice line
+One client; lines reference billable placements
+Issue status versus settlement and overdue flags
+Credit note
+Original invoice and affected lines
+Fee reduction versus cash refund
+Receipt and allocation
+One client; allocations reference invoices
+Actual received cash versus allocated and unapplied credit
+Refund
+Client credit and original receipt or settlement reference
+Cash outflow versus invoice fee correction
+Task and activity
+Related business record; actor and owner
+Recorded communications versus external delivery
+User role and target
+Team, manager and permission configuration
+Current owner versus historical revenue attribution
+Cash entry
+Agency currency, date, category and actual or forecast type
+Manual management outflow versus accounting ledger
+
+8 Business calculations and controls
+8 1 Fees and invoice values
+Percentage fee = agreed annual salary basis multiplied by fee percentage divided by 100. Fixed fee = the agreed amount per placement. Store both the salary basis and selected fee method. Do not calculate a percentage against an ambiguous monthly salary.
+Net line fee = fee less line discount. Net invoice fee = sum of net line fees. Illustrative tax is calculated on each net line using its configured rate, rounded to two decimals. Invoice total = net invoice fee plus total tax. Discounts cannot make a line negative. Production tax treatment requires separate confirmation.
+Net invoiced fees for a reporting period = net fees on invoices issued in that period less net fee portions of credits issued in that period, excluding cancelled invoices. Tax is excluded. A credit issued later affects that later reporting period; an invoice drill-down still shows its cumulative credits.
+8 2 Receivables and cash
+Invoice effective total = issued invoice total less issued credit-note totals. Invoice signed balance = effective total less net allocated payments. Net allocated payments reflect receipt reversals and any refund or credit transfer that releases an allocation.
+Outstanding = the greater of signed balance and zero. A negative signed balance creates client credit or a refund liability rather than negative receivables. Cancellation removes the invoice from receivables but preserves its history.
+Current amount = positive outstanding on invoices due today or later. Overdue amount = positive outstanding where the due date is before the as-of date. Days overdue = the difference in calendar dates, with a minimum of zero. Disputed invoices remain included and are also identified separately.
+Net cash collected = valid receipts less receipt reversals and refunds, using their actual transaction dates. Receipt allocation does not create additional cash. Gross cash collections and client allocated collections must be separately labelled where unapplied credits exist.
+For attribution of a partially paid invoice line, allocate payment across its remaining fee and tax proportionally. Attribute only the fee portion to recruiters using stored shares. The total recruiter-attributed fee collections must equal the agency's allocated fee collections, not its tax-inclusive cash receipts.
+8 3 Pipeline forecast and uninvoiced fees
+For each job, let r be remaining original vacancies, p be the sum of probabilities of eligible unplaced applications, and w be the sum of each estimated fee multiplied by its probability. Probabilities use decimal values. Weighted expected fee for the job = w multiplied by min(1, r divided by p), when p is greater than zero; otherwise zero. A job with no remaining vacancies contributes zero. Apply the capacity limit across all eligible applications for the job before grouping contributions by recruiter or expected joining month. This is a capacity-limited demonstration model, subject to client approval.
+Unweighted job opportunity = remaining vacancies multiplied by the job's reference fee. When a percentage fee is used before an offer exists, use the midpoint of the recorded annual salary range as an explicit forecast assumption. An application with accepted offer terms uses those terms for its weighted estimate.
+Billable uninvoiced fees = fees of confirmed billable placements without an issued invoice. Show the subset already linked to draft invoices separately. A placement appears once in the total; creating a draft does not create additional expected revenue. Issuing an invoice moves the fee from uninvoiced to invoiced.
+Pipeline forecast, uninvoiced fees, net invoiced fees and actual collections describe different stages. They must not be added together into a single revenue card. Forecast collection dates for uninvoiced placements require a planned issue date and complete trigger terms.
+8 4 Operational measures
+Filled vacancies = active original placement slots, including an original slot occupied by its linked replacement. Vacated slots with an active replacement case remain reserved and show as Replacement Pending. They are not simultaneously presented as open original opportunities. Vacancy reopening after a failed guarantee or client decision requires an explicit action.
+Time to fill = calendar days between job opened date and actual joining date for each original placement. Replacement time is measured separately from replacement approval to replacement joining.
+Funnel conversion = applications from a selected creation-date cohort that reached the later stage divided by those in the same cohort that reached the earlier stage. State the cohort and cut-off date. Offer acceptance = accepted offers divided by offers with a final candidate response in the selected cohort. A zero denominator displays Not Available.
+Target achievement = actual divided by target multiplied by 100. A zero or absent target displays Not Set. Free replacements are excluded from original billable placement and fee targets.
+8 5 Date and history controls
+Due date = recorded trigger date plus 30, 45, 60 or 90 calendar days. Guarantee end date = original actual joining date plus stored guarantee days. Initial replacement eligibility uses employment end date on or before guarantee end date, together with recorded contractual conditions. Any request deadline is an additional configurable condition rather than an assumed universal policy.
+Edits to current settings do not change issued invoice values, due dates, historical recruiter shares or guarantee terms. Changes to these snapshots require an explicit amendment, a reason and an appropriate financial adjustment where necessary.
+9 Prototype pages and navigation
+The Super Admin sidebar will provide the following destinations. Record detail pages and working forms are part of each destination, rather than optional future screens.
+Navigation area
+Required pages and views
+Dashboard
+Founder overview, operational and financial drill-downs
+Clients
+List, create or edit, profile and linked records
+Jobs
+List, create or edit, detail, recruiter allocation and vacancies
+Candidates
+ATS search, profile, create or edit, import and duplicate review
+Pipeline
+Kanban, table, application details and history
+Interviews
+Calendar, list, scheduling, feedback and rescheduling
+Offers
+Offer list, detail, revisions and decision actions
+Joinings
+Upcoming queue, confirmation and placement details
+Replacements
+Register, eligibility review and replacement fulfilment
+Recruiter Performance
+Comparison, individual profile and targets
+Invoices
+Register, draft builder, issue preview and credit notes
+Payments
+Receipt register, allocations, unapplied credit and refunds
+Collections
+Due invoices, overdue ageing, disputes and commitments
+Revenue Forecast
+Pipeline, uninvoiced fees and forecast assumptions
+Cash Flow
+Actual collections, forecast and manual outflow entries
+Reports
+Client, recruiter, recruitment and finance report catalogue
+Tasks and Activities
+Follow-ups, linked activities and local history
+Users and Roles
+User list, role presets and permission preview
+Settings
+Masters, commercial defaults and demonstration controls
+
+Payment cycles must be accessible from client terms, placement details and invoice details, with dedicated cycle filtering in Collections. Client revenue and recruiter reports must remain easy to find in Reports even when dashboard shortcuts also exist.
+10 Frontend demonstration delivery specification
+10 1 Technical boundary
+Use a frontend application with a central local state store and linked fictional records. Browser local storage may preserve JSON data between visits, with an in-memory fallback and a visible message if browser storage is unavailable. Provide a versioned seed and a confirmed Reset Demo action.
+Do not build application server routes, database schemas, migrations, authentication providers, payment gateways, API services, webhooks or external integrations. A local development server or static preview host is acceptable for serving the frontend; it must not implement application backend functions.
+Open directly into Super Admin. A demo role matrix, login illustration or invitation preview does not perform authentication. Money actions create local records only. Communications create internal activities or unsent previews only.
+10 2 Interaction requirements
+Every visible primary control must perform its named local action. Forms must save data, edits must update the same record, filters must affect rows, tabs must show their content and exports must download actual filtered data. Drag-and-drop actions require a menu alternative. Confirmation dialogues are required for destructive resets, cancellations, reversals and material financial adjustments.
+Use one shared data model so actions update all affected pages. Invoice issue, receipt allocation, credit issue and replacement joining must update dashboards, reports and related records immediately. Read-only or unavailable actions must show a specific explanation; Coming Soon pages are not acceptable for included functions.
+10 3 Demonstration data
+Seed at least 8 fictional clients, 20 jobs, 60 candidates, 80 applications, 5 recruiters, 25 interview rounds, 15 offers, 12 placements, 4 replacement cases, 12 invoices, 10 receipts and 15 tasks. Counts may be increased to keep relationships and scenario coverage consistent.
+Include every payment duration, varied fee models, at least one candidate with multiple applications, a split recruiter attribution, future and past interviews, accepted and declined offers, an overdue joining, free and billable replacement examples, partial payments, unapplied credit, issued credit notes, a dispute, a missed payment commitment and multiple ageing buckets. Generate records relative to the initial demonstration date of 5 October 2026 and retain a control to change that date.
+All foreign-key references must resolve. Invoices must reference genuinely joined billable placements, and all displayed financial totals must be calculated from these records. Do not use unrelated hard-coded numbers in dashboard cards or charts.
+10 4 Design and usability
+Provide a professional desktop-first SaaS interface with a collapsible sidebar, restrained colours, readable typography, consistent status styling and responsive layouts. Key tasks must work at desktop and tablet sizes; narrow screens can use stacked forms and horizontally scrollable tables.
+Use accessible labels, focus states, meaningful empty states and readable contrast. Modals and drawers must support keyboard closing where appropriate. Charts require tooltips and underlying record access. British English labels and DD MMM YYYY dates apply throughout.
+11 Demonstration acceptance scenarios
+ID
+Scenario
+Required result
+AC-01
+Create a client with 45-day terms and a percentage fee
+Client appears in lists and supplies correct defaults to a new job
+AC-02
+Add a candidate and apply to two jobs
+One profile has two independent application histories
+AC-03
+Import a CSV with valid, invalid and duplicate rows
+Preview explains issues; only confirmed eligible rows are imported
+AC-04
+Move a candidate through screening and submission
+Stage history, counts and forecast update; missing fields block the move
+AC-05
+Reschedule and complete an interview
+Calendar, list, feedback and history remain consistent
+AC-06
+Select a candidate, revise an offer and accept it
+Latest salary drives fee estimate and a joining tracker is created
+AC-07
+Confirm joining twice
+One placement and one filled original vacancy exist
+AC-08
+Create and issue an invoice for the placement
+Receivable and fee reports update; duplicate billing is blocked
+AC-09
+Test 30, 45, 60 and 90-day terms and alternative triggers
+Due dates match stored trigger and duration; missing triggers block issue
+AC-10
+Record a partial receipt and then an excess receipt
+Correct outstanding, settlement status, cash and unapplied credit appear
+AC-11
+Move the as-of date past invoice due date
+Correct overdue days and ageing bucket appear without altering the invoice
+AC-12
+Record a promise and dispute
+Forecast date and dispute flag change; contractual ageing remains intact
+AC-13
+Issue a credit after payment and record a refund
+Client credit and refund reconcile; original receipt history is retained
+AC-14
+Reverse a receipt
+Outstanding reopens and cash totals update with reversal history
+AC-15
+Fulfil a free replacement
+Case closes; no second fee or extra original vacancy is counted
+AC-16
+Apply split recruiter attribution
+Recruiter amounts sum to agency fee totals and survive reassignment
+AC-17
+Filter and export a report
+Downloaded rows and totals match the selected filters
+AC-18
+Update roles, deactivate a recruiter and preview permissions
+Open work can be reassigned; historical attribution and Super Admin access remain
+AC-19
+Refresh and reset the demonstration
+Local changes persist where storage is available; reset restores consistent data
+AC-20
+Follow a dashboard metric into supporting records
+Filters and totals reconcile with the originating metric
+
+12 Deliverables and completion criteria
+The planning deliverables are this detailed Scope of Work and a separate ready-to-use Codex prompt. The subsequent prototype build will deliver the frontend source, a working local or static preview, fictional seed data, a module coverage matrix, a demonstration guide and a record of completed verification.
+Prototype completion requires all Section 9 destinations, the actions in Section 6, the calculations in Section 8 and all applicable Section 11 scenarios. A visually complete screen without working local interactions does not meet the demonstration requirement.
+Commercial estimates, production architecture, live integrations, hosting, service-level commitments, real security enforcement, deployment hardening and operational data migration will be scoped separately once the client approves the business processes.
+13 Exclusions and future scope
+Real backend, database, identity service, payment processing and external API connections in the prototype.
+Client or candidate self-service portals, public vacancy website, online candidate applications and job-board posting.
+Resume parsing, AI screening, automated matching, background verification and psychometric assessments.
+Email, SMS, WhatsApp, external calendar synchronisation, e-signatures and automatic document delivery.
+Payroll, contract staffing billing, attendance, timesheets, employee HR management and recruiter commission payout processing.
+Statutory tax filings, tax-compliance certification, complete double-entry accounting and automated bank reconciliation.
+Multi-tenant administration, multi-currency conversion and native mobile applications.
+Production data retention enforcement, encryption design, security certification, disaster recovery and infrastructure provisioning.
+These exclusions do not remove the local demonstrations of resume attachment metadata, communication previews, invoice tax examples, receipt recording or permission configuration specified elsewhere.
+14 Client confirmation checklist
+Before final production estimation, confirm the following decisions. The prototype may use Section 2 defaults while these decisions are reviewed.
+1. Permanent recruitment only, or contract staffing as an additional project scope.
+2. Final internal roles, teams, record visibility and finance permissions.
+3. Exact candidate stages, permitted shortcuts and approval requirements.
+4. Fee basis, annual salary components, minimum fees, discounts and any milestone billing.
+5. Payment-cycle trigger and whether calendar days or working days apply.
+6. Invoice eligibility, grouping rules, invoice numbering and cancellation policy.
+7. Applicable tax presentation, withholding and settlement treatment. Withholding is outside the prototype baseline until agreed.
+8. Replacement eligibility, request deadlines, guarantee restart and credit or refund policy.
+9. Recruiter attribution, targets and whether commission calculation needs a separate module.
+10. Candidate consent, permissible shared database access, retention and deletion policies.
+11. Desired forecast probabilities, cash-outflow coverage and reporting definitions.
+12. Branding, sample document formats, currency, timezone and any future integration priorities.
+15 Recommended implementation sequence
+1. Review this Scope of Work with the client and record amendments to the assumptions and financial rules.
+2. Provide the approved document and the separate Codex prompt together. Ask Codex to build one connected frontend demonstration in staged implementation checkpoints.
+3. Start with the shared record model, seed data, navigation and master settings. Then complete clients, jobs, ATS and applications.
+4. Complete interviews, offers, joinings and replacements before implementing invoice and payment actions that depend on them.
+5. Implement collections, forecast, cash flow and reports using the shared calculation rules. Finish users, permissions, tasks and internal notifications.
+6. Demonstrate the acceptance scenarios with the client, collect feedback and refine the frontend. Confirm production scope, delivery plan and costs afterwards.
+The stages organise the work but do not reduce the agreed module coverage. The finished prototype must remain one navigable Super Admin application with connected local behaviour across all modules.
